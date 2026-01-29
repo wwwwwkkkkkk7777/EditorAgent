@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+import os from "os";
+
+const EDITS_DIR = path.resolve(process.cwd(), "../../..", "ai_workspace");
+const SYNC_FILE = path.join(EDITS_DIR, "sync-input.json");
+
+/**
+ * SSE 实时同步接口 - 实现“监控文件，自动热更新时间轴”
+ */
+export async function GET(req: NextRequest) {
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+        start(controller) {
+            // 确保目录存在
+            if (!fs.existsSync(EDITS_DIR)) {
+                fs.mkdirSync(EDITS_DIR, { recursive: true });
+            }
+
+            // 发送初始连接成功消息
+            controller.enqueue(encoder.encode("event: connected\ndata: { \"status\": \"ready\" }\n\n"));
+
+            // --- NEW: 发送初始快照 (初始全量同步) ---
+            const SNAPSHOT_FILE = path.join(EDITS_DIR, "project-snapshot.json");
+            if (fs.existsSync(SNAPSHOT_FILE)) {
+                try {
+                    const content = fs.readFileSync(SNAPSHOT_FILE, "utf-8");
+                    if (content.trim()) {
+                        const data = JSON.parse(content);
+                        console.log("[SSE] Sending initial project snapshot to new client...");
+                        controller.enqueue(encoder.encode(`event: snapshot_update\ndata: ${JSON.stringify(data)}\n\n`));
+                    }
+                } catch (e) {
+                    console.error("[SSE] Failed to send initial snapshot:", e);
+                }
+            }
+
+            // --- 核心逻辑：监听文件系统 ---
+            const processedIds = new Set<string>();
+            const EDITS_FILE = path.join(EDITS_DIR, "pending-edits.json");
+
+            // Initial load to track what's already there
+            if (fs.existsSync(EDITS_FILE)) {
+                try {
+                    const initialContent = fs.readFileSync(EDITS_FILE, "utf-8");
+                    const initialData = JSON.parse(initialContent);
+                    if (Array.isArray(initialData)) {
+                        initialData.forEach(e => processedIds.add(e.id));
+                    }
+                } catch (e) {
+                    // Ignore parsing error for initial load
+                }
+            }
+
+            const watcher = fs.watch(EDITS_DIR, (eventType, filename) => {
+                const isSyncFile = filename === "sync-input.json";
+                const isPendingEdits = filename === "pending-edits.json";
+                const isSnapshotFile = filename === "project-snapshot.json";
+
+                if (isSyncFile || isPendingEdits || isSnapshotFile) {
+                    try {
+                        const targetFile = path.join(EDITS_DIR, filename);
+                        if (fs.existsSync(targetFile)) {
+                            const content = fs.readFileSync(targetFile, "utf-8");
+                            if (!content.trim()) return;
+
+                            const data = JSON.parse(content);
+
+                            if (isSnapshotFile) {
+                                // project-snapshot.json changed (external edit)
+                                console.log("[SSE] Project snapshot changed, pushing update to Web...");
+                                controller.enqueue(encoder.encode(`event: snapshot_update\ndata: ${JSON.stringify(data)}\n\n`));
+                            } else if (isPendingEdits && Array.isArray(data)) {
+                                // 如果是 pending-edits.json 变了，检查是否有新增的未处理编辑
+                                for (const edit of data) {
+                                    if (!processedIds.has(edit.id)) {
+                                        processedIds.add(edit.id); // Mark as sent
+
+                                        // Allow all common editor actions to be pushed via SSE
+                                        const allowedActions = [
+                                            "addSubtitle",
+                                            "addText",
+                                            "addMultipleSubtitles",
+                                            "clearSubtitles",
+                                            "removeElement",
+                                            "updateElement",
+                                            "splitElement",
+                                            "moveElement",
+                                            "addMarkers",
+                                            "setFullState",
+                                            "importAudioBatch",
+                                            "importMedia",
+                                            "importImage",
+                                            "importVideo",
+                                            "importAudio"
+                                        ];
+
+                                        if (allowedActions.includes(edit.action)) {
+                                            console.log(`[SSE] Pushing new edit to Web: ${edit.action}`);
+                                            controller.enqueue(encoder.encode(`event: edit\ndata: ${JSON.stringify(edit)}\n\n`));
+                                        }
+                                    }
+                                }
+                            } else {
+                                // 如果是控制文件变了，直接转发
+                                console.log("[SSE] Sync input file change detected, pushing update to Web...");
+                                controller.enqueue(encoder.encode(`event: update\ndata: ${JSON.stringify(data)}\n\n`));
+                            }
+                        }
+                    } catch (e) {
+                        // 忽略读取时的瞬时错误（如文件正在被写入）
+                    }
+                }
+            });
+
+            // 当连接关闭时，停止监听
+            req.signal.addEventListener("abort", () => {
+                watcher.close();
+                controller.close();
+                console.log("[SSE] Client disconnected, watcher closed.");
+            });
+        },
+    });
+
+    return new NextResponse(stream, {
+        headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
+    });
+}

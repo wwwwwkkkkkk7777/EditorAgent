@@ -1,0 +1,133 @@
+// MOCKED mediabunny-utils to remove mediabunny and @ffmpeg/ffmpeg dependencies
+
+export interface VideoInfo {
+  width: number;
+  height: number;
+  duration: number;
+  format: string;
+}
+
+export const getVideoInfo = async (file: File): Promise<VideoInfo> => {
+  console.log("[Mock] getVideoInfo for", file.name);
+  return new Promise((resolve) => {
+    // Create a dummy video element to get dimensions (browser native way, no ffmpeg needed)
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src);
+      resolve({
+        width: video.videoWidth || 1920,
+        height: video.videoHeight || 1080,
+        duration: video.duration || 10,
+        format: file.type
+      });
+    }
+    video.onerror = () => {
+      resolve({
+        width: 1920,
+        height: 1080,
+        duration: 0,
+        format: 'unknown'
+      });
+    }
+    video.src = URL.createObjectURL(file);
+  });
+};
+
+export const generateThumbnail = async (
+  file: File,
+  time: number = 0
+): Promise<string> => {
+  console.log("[Native] generateThumbnail for", file.name);
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.src = URL.createObjectURL(file);
+
+    const cleanup = () => {
+      URL.revokeObjectURL(video.src);
+      video.remove();
+    };
+
+    video.onloadedmetadata = () => {
+      // Ensure we have dimensions
+      if (video.videoWidth === 0) return;
+      video.currentTime = Math.min(time, video.duration);
+    };
+
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const videoWidth = video.videoWidth || 640;
+        const videoHeight = video.videoHeight || 360;
+
+        // Resize to reasonable thumbnail size
+        const aspect = videoWidth / videoHeight;
+        canvas.width = 320;
+        canvas.height = 320 / aspect;
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl);
+        } else {
+          resolve(""); // fallback
+        }
+      } catch (e) {
+        console.error("Thumbnail generation failed", e);
+        resolve("");
+      } finally {
+        cleanup();
+      }
+    };
+
+    video.onerror = () => {
+      console.error("Video load error for thumbnail");
+      cleanup();
+      resolve("");
+    };
+  });
+};
+
+export const extractTimelineAudio = async (
+  timelineData?: any
+): Promise<Blob> => {
+  console.log("[Mediabunny Utils] extractTimelineAudio requested");
+  
+  // Try to get timeline from store if not provided
+  const tracks = timelineData?.tracks || [];
+  
+  // In a real implementation, we would use ffmpeg.wasm to merge all audio
+  // For now, let's find the first element with audio and use that as the source
+  // This is better than returning an empty blob for testing.
+  
+  let sourceUrl = "";
+  
+  // Look for video or audio tracks
+  for (const track of tracks) {
+    if (track.type === "video" || track.type === "audio") {
+      const firstElement = track.elements[0];
+      if (firstElement && (firstElement.type === "video" || firstElement.type === "audio")) {
+        sourceUrl = (firstElement as any).url;
+        if (sourceUrl) break;
+      }
+    }
+  }
+
+  if (sourceUrl) {
+    console.log(`[Mediabunny Utils] Using source for transcription: ${sourceUrl}`);
+    try {
+      const response = await fetch(sourceUrl);
+      if (response.ok) {
+        return await response.blob();
+      }
+    } catch (e) {
+      console.error("Failed to fetch source audio for transcription", e);
+    }
+  }
+
+  console.warn("[Mediabunny Utils] No audio source found in timeline, returning empty blob");
+  return new Blob([], { type: 'audio/wav' });
+};

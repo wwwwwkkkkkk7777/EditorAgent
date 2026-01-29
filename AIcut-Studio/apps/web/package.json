@@ -1,0 +1,158 @@
+{
+  "name": "aicut-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-Powered Video Editor",
+  "author": "AIcut Team",
+  "license": "MIT",
+  "main": "electron/main.js",
+  "packageManager": "pnpm@10.25.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check src/",
+    "lint:fix": "biome check src/ --write",
+    "format": "biome format src/ --write",
+    "electron": "electron .",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "electron:build": "cross-env STATIC_EXPORT=true next build && electron-builder",
+    "electron:pack": "electron-builder --dir",
+    "app": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.2.1",
+    "nanoid": "^5.1.5",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@hookform/resolvers": "^3.9.1",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@remotion/bundler": "4.0.405",
+    "@remotion/cli": "4.0.405",
+    "@remotion/lottie": "4.0.405",
+    "@remotion/player": "4.0.405",
+    "@remotion/renderer": "4.0.405",
+    "@remotion/shapes": "4.0.405",
+    "@remotion/three": "4.0.405",
+    "@remotion/transitions": "4.0.405",
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/bun": "latest",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vercel/analytics": "^1.4.1",
+    "@babel/standalone": "^7.25.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.0.0",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "dayjs": "^1.11.13",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "embla-carousel-react": "^8.5.1",
+    "feed": "^5.1.0",
+    "framer-motion": "^11.13.1",
+    "input-otp": "^1.4.1",
+    "lucide-react": "^0.468.0",
+    "mediabunny": "^1.28.0",
+    "motion": "^12.18.1",
+    "next": "15.1.0",
+    "next-themes": "^0.4.4",
+    "postcss": "^8",
+    "radix-ui": "^1.4.2",
+    "react": "^19.0.0",
+    "react-country-flag": "^3.1.0",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.0",
+    "react-icons": "^5.4.0",
+    "react-markdown": "^10.1.0",
+    "react-phone-number-input": "^3.4.11",
+    "react-resizable-panels": "^2.1.7",
+    "recharts": "^2.14.1",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-parse": "^9.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-slug": "^6.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remotion": "4.0.405",
+    "sonner": "^1.7.1",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss": "^4.1.11",
+    "tailwindcss-animate": "^1.0.7",
+    "undici": "^6.21.1",
+    "three": "^0.177.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3",
+    "unified": "^11.0.5",
+    "vaul": "^1.1.1",
+    "wait-on": "^7.2.0",
+    "wavesurfer.js": "^7.12.1",
+    "zustand": "^5.0.2"
+  },
+  "build": {
+    "appId": "com.aicut.studio",
+    "productName": "AIcut Studio",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "out/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../../tools",
+        "to": "tools",
+        "filter": [
+          "**/*.py",
+          "**/*.json"
+        ]
+      },
+      {
+        "from": "python-runtime",
+        "to": "python"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "electron/assets/icon.png"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "electron/assets/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "electron/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

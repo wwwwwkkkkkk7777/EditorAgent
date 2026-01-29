@@ -1,0 +1,848 @@
+{
+  "project": {
+    "id": "demo",
+    "name": "demo",
+    "thumbnail": null,
+    "createdAt": "2026-01-18T09:25:41.831Z",
+    "updatedAt": "2026-01-18T09:25:41.831Z",
+    "scenes": [
+      {
+        "id": "scene_1768728341831",
+        "name": "Main Scene",
+        "isMain": true
+      }
+    ],
+    "currentSceneId": "scene_1768728341831",
+    "backgroundColor": "#000000",
+    "backgroundType": "color",
+    "blurIntensity": 0,
+    "bookmarks": [],
+    "fps": 30,
+    "canvasSize": {
+      "width": 1920,
+      "height": 1080
+    },
+    "canvasMode": "preset"
+  },
+  "tracks": [
+    {
+      "id": "14e6d84d-f43a-4dde-ac98-ae7d00d0577f",
+      "name": "Text Track",
+      "type": "text",
+      "elements": [
+        {
+          "type": "text",
+          "content": "Default Text",
+          "duration": 5,
+          "startTime": 15.690100000001495,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#ffffff",
+          "backgroundColor": "transparent",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "opacity": 1,
+          "id": "9bd83b12-c4f3-419f-ba2f-41cbe1dfd024"
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "e264d49d-e177-4771-bafc-5e2437788807",
+      "name": "AI 字幕",
+      "type": "text",
+      "elements": [
+        {
+          "type": "text",
+          "content": "那是一个宁静的午后",
+          "startTime": 0.47333333333333333,
+          "duration": 1.46,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "061af20c-db9e-4708-9831-7d10697060d7"
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "6926d2b8-7787-4359-9da6-7134a9ccdfce",
+      "name": "AI 字幕",
+      "type": "text",
+      "elements": [
+        {
+          "type": "text",
+          "content": "那是一个宁静的午后",
+          "startTime": 0.3333333333333333,
+          "duration": 1.7400000000000002,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "eed0f0f8-5dbc-4d16-8c32-5f4976d7b664"
+        },
+        {
+          "type": "text",
+          "content": "洛阳城外",
+          "startTime": 2.84,
+          "duration": 0.9199999999999999,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "81e1d12f-620a-4590-b61b-be6fd26a9640"
+        },
+        {
+          "type": "text",
+          "content": "阳光透过树梢",
+          "startTime": 4.44,
+          "duration": 1.3999999999999995,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "597d3c85-97f9-485a-a0e6-0e832d25b982"
+        },
+        {
+          "type": "text",
+          "content": "洒满林间",
+          "startTime": 6.32,
+          "duration": 0.9399999999999995,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "aa994180-1e54-4a5c-aa02-1785f0f8dae0"
+        },
+        {
+          "type": "text",
+          "content": "远道而来的孔秋",
+          "startTime": 8,
+          "duration": 1.6199999999999992,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "9a132fd7-0510-444a-9079-5554650f2cac"
+        },
+        {
+          "type": "text",
+          "content": "和他仰慕已久的李尔",
+          "startTime": 10.98,
+          "duration": 1.5399999999999991,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "d49304f6-a0b7-40a9-b95d-0f8d9407e412"
+        },
+        {
+          "type": "text",
+          "content": "做了最后一次交谈",
+          "startTime": 12.84,
+          "duration": 1.1999999999999993,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "ae0456dd-c442-4716-8329-8eb7e2f9e7dc"
+        },
+        {
+          "type": "text",
+          "content": "年轻的孔秋滔滔不绝",
+          "startTime": 14.94,
+          "duration": 2.0600000000000005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "13b2887b-45d2-49c7-a086-25f12c32e281"
+        },
+        {
+          "type": "text",
+          "content": "既慷慨又坦诚",
+          "startTime": 17.44,
+          "duration": 1.9399999999999977,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "5919c5f4-707f-4d2c-90db-dda9f6ba92d7"
+        },
+        {
+          "type": "text",
+          "content": "讲述了他对时下风气的焦虑和疑惑",
+          "startTime": 20.48,
+          "duration": 3.719999999999999,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "3eb8df10-6063-49b5-bd82-bf2184ac2047"
+        },
+        {
+          "type": "text",
+          "content": "也表达了他对理想社会的强烈渴望",
+          "startTime": 25.06,
+          "duration": 2.9800000000000004,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "x": 960,
+          "y": 900,
+          "fontSize": 48,
+          "fontFamily": "Arial",
+          "color": "#FFFFFF",
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "textAlign": "center",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "rotation": 0,
+          "opacity": 1,
+          "id": "12975c1e-265b-4da7-b3b3-9ea00b607236"
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "2dc506b7-e088-4cec-bb9d-e42fc04f96c3",
+      "name": "Media Track",
+      "type": "media",
+      "elements": [
+        {
+          "type": "media",
+          "mediaId": "2cd4aca8-7b29-4c97-8f5f-e489532bc271",
+          "name": "material-symbols-3d-rotation",
+          "duration": 5,
+          "startTime": 0,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "id": "55d1dbd9-418f-418f-9808-bfd92cd8eb88",
+          "x": 960,
+          "y": 540,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "volume": 1
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "e8c36405-7c71-490e-8e41-4710af84ea55",
+      "name": "Media Track",
+      "type": "media",
+      "elements": [
+        {
+          "id": "8b71c4d4-b19f-4f95-8bcd-27f5362bef4b",
+          "type": "media",
+          "mediaId": "asset_211904_1768377612",
+          "name": "素材_1",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_3qoch3qoch3qoch3.png",
+          "startTime": 0,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          },
+          "transition": {
+            "out": {
+              "type": "fade",
+              "duration": 0.5
+            }
+          }
+        },
+        {
+          "id": "3aab5ad3-77e5-4926-93b6-2aa89ff07d02",
+          "type": "media",
+          "mediaId": "asset_541415_1768377697",
+          "name": "素材_2",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_68nkq568nkq568nk.png",
+          "startTime": 2.8368005,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          },
+          "transition": {
+            "in": {
+              "type": "fade",
+              "duration": 0.5
+            }
+          }
+        },
+        {
+          "id": "42f5395e-0315-40ef-b2cb-1c800fcdbe6c",
+          "type": "media",
+          "mediaId": "asset_988574_1768377811",
+          "name": "素材_3",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_cit5wqcit5wqcit5.png",
+          "startTime": 5.673601,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "7756795b-1947-43cb-a0df-974191e6926a",
+          "type": "media",
+          "mediaId": "asset_592404_1768377592",
+          "name": "素材_4",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_g5b2ymg5b2ymg5b2.png",
+          "startTime": 8.5104015,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "01bc9fcd-ea72-4a2f-bff8-b6a1f495d601",
+          "type": "media",
+          "mediaId": "asset_924012_1768377798",
+          "name": "素材_5",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_lrdkkalrdkkalrdk.png",
+          "startTime": 11.347202,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "3e4f6fc6-a0f0-48b7-afa2-f4ba1d5c96f8",
+          "type": "media",
+          "mediaId": "asset_119372_1768377759",
+          "name": "素材_6",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_m5bqfbm5bqfbm5bq.png",
+          "startTime": 14.184002499999998,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "23c6d20b-a02c-45ea-8b27-d8fd9aba7f26",
+          "type": "media",
+          "mediaId": "asset_150145_1768377727",
+          "name": "素材_7",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_ot50nfot50nfot50.png",
+          "startTime": 17.020803,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "3d2f3219-1f94-48f1-b46f-d6284826ce11",
+          "type": "media",
+          "mediaId": "asset_44301_1768377668",
+          "name": "素材_8",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_qzcmglqzcmglqzcm.png",
+          "startTime": 19.8576035,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "3fe5ad2d-030b-41ff-92c5-6669cb98df72",
+          "type": "media",
+          "mediaId": "asset_983241_1768377643",
+          "name": "素材_9",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_s4vce2s4vce2s4vc.png",
+          "startTime": 22.694404,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        },
+        {
+          "id": "9e923757-0b6c-4190-ae83-3f3cbc4ad29b",
+          "type": "media",
+          "mediaId": "asset_176068_1768377790",
+          "name": "素材_10",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_xa6pyzxa6pyzxa6p.png",
+          "startTime": 25.531204499999998,
+          "duration": 2.8368005,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1.05,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2",
+            "animation": "zoomIn"
+          }
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "25bcb49b-4fdd-4ca0-9ed2-7cfd079ab73a",
+      "name": "Main Track",
+      "type": "media",
+      "elements": [],
+      "muted": false,
+      "isMain": true
+    },
+    {
+      "id": "4729b11a-5e6d-4ccd-912a-40e3b54dcf63",
+      "name": "Audio Track",
+      "type": "audio",
+      "elements": [
+        {
+          "type": "media",
+          "mediaId": "asset_022242",
+          "name": "群星下的远征.mp3",
+          "duration": 245.4,
+          "startTime": 6.4558999999985085,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "id": "9de63d03-6cfd-4fcb-9ea9-6c2eddc4d26c",
+          "x": 960,
+          "y": 540,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "volume": 3.64
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "d5577222-2421-4579-bb2f-7d00697d41fc",
+      "name": "Audio Track",
+      "type": "audio",
+      "elements": [
+        {
+          "type": "media",
+          "mediaId": "asset_82297_1768741704",
+          "name": "TTS: 洛阳城外",
+          "duration": 1.608,
+          "startTime": 0,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "id": "57c390a8-e8d0-4170-97a6-5ddeca6ccaed",
+          "x": 960,
+          "y": 540,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "volume": 1
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "5d382673-468a-4d8b-aba2-c58ccfc2851b",
+      "name": "AI 语音 21:07:45",
+      "type": "audio",
+      "elements": [
+        {
+          "id": "14c01c18-8470-430b-bc60-37470098914a",
+          "type": "media",
+          "mediaId": "asset_793305_1768740767",
+          "name": "TTS: 那是一个宁静的午后",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_eed0f0f8-5dbc-4d16-8c32-5f4976d7b664.mp3",
+          "startTime": 0.3333333333333333,
+          "duration": 2.256,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2"
+          }
+        }
+      ],
+      "muted": false
+    },
+    {
+      "id": "2f048c2d-03f8-45f5-9380-509dd1c89ceb",
+      "name": "AI 语音 21:13:56",
+      "type": "audio",
+      "elements": [
+        {
+          "id": "27ded7be-b3d0-46dc-a4a1-e48f4a67f155",
+          "type": "media",
+          "mediaId": "asset_82297_1768741704",
+          "name": "TTS: 洛阳城外",
+          "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_81e1d12f-620a-4590-b61b-be6fd26a9640.mp3",
+          "startTime": 2.84,
+          "duration": 1.608,
+          "trimStart": 0,
+          "trimEnd": 0,
+          "muted": false,
+          "volume": 1,
+          "x": 960,
+          "y": 540,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "metadata": {
+            "importSource": "sdk_v2"
+          }
+        }
+      ],
+      "muted": false
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset_211904_1768377612",
+      "name": "素材_1",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_3qoch3qoch3qoch3.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_3qoch3qoch3qoch3.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_3qoch3qoch3qoch3.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_541415_1768377697",
+      "name": "素材_2",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_68nkq568nkq568nk.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_68nkq568nkq568nk.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_68nkq568nkq568nk.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_988574_1768377811",
+      "name": "素材_3",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_cit5wqcit5wqcit5.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_cit5wqcit5wqcit5.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_cit5wqcit5wqcit5.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_592404_1768377592",
+      "name": "素材_4",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_g5b2ymg5b2ymg5b2.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_g5b2ymg5b2ymg5b2.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_g5b2ymg5b2ymg5b2.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_924012_1768377798",
+      "name": "素材_5",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_lrdkkalrdkkalrdk.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_lrdkkalrdkkalrdk.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_lrdkkalrdkkalrdk.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_119372_1768377759",
+      "name": "素材_6",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_m5bqfbm5bqfbm5bq.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_m5bqfbm5bqfbm5bq.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_m5bqfbm5bqfbm5bq.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_150145_1768377727",
+      "name": "素材_7",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_ot50nfot50nfot50.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_ot50nfot50nfot50.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_ot50nfot50nfot50.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_44301_1768377668",
+      "name": "素材_8",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_qzcmglqzcmglqzcm.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_qzcmglqzcmglqzcm.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_qzcmglqzcmglqzcm.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_983241_1768377643",
+      "name": "素材_9",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_s4vce2s4vce2s4vc.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_s4vce2s4vce2s4vc.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_s4vce2s4vce2s4vc.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_176068_1768377790",
+      "name": "素材_10",
+      "type": "image",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_xa6pyzxa6pyzxa6p.png",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5CGemini_Generated_Image_xa6pyzxa6pyzxa6p.png",
+      "filePath": "D:\\Desktop\\AIcut\\source\\Gemini_Generated_Image_xa6pyzxa6pyzxa6p.png",
+      "duration": 2.8368005,
+      "isLinked": true
+    },
+    {
+      "id": "asset_793305_1768740767",
+      "name": "TTS: 那是一个宁静的午后",
+      "type": "audio",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_eed0f0f8-5dbc-4d16-8c32-5f4976d7b664.mp3",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_eed0f0f8-5dbc-4d16-8c32-5f4976d7b664.mp3",
+      "filePath": "D:\\Desktop\\AIcut\\projects\\demo\\assets\\audio\\tts_eed0f0f8-5dbc-4d16-8c32-5f4976d7b664.mp3",
+      "duration": 2.256,
+      "isLinked": true
+    },
+    {
+      "id": "asset_022242",
+      "name": "群星下的远征.mp3",
+      "type": "audio",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Csource%5C%E7%BE%A4%E6%98%9F%E4%B8%8B%E7%9A%84%E8%BF%9C%E5%BE%81.mp3",
+      "filePath": "D:\\Desktop\\AIcut\\source\\群星下的远征.mp3",
+      "duration": 245.4,
+      "isLinked": true
+    },
+    {
+      "id": "asset_82297_1768741704",
+      "name": "TTS: 洛阳城外",
+      "type": "audio",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_81e1d12f-620a-4590-b61b-be6fd26a9640.mp3",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_81e1d12f-620a-4590-b61b-be6fd26a9640.mp3",
+      "filePath": "D:\\Desktop\\AIcut\\projects\\demo\\assets\\audio\\tts_81e1d12f-620a-4590-b61b-be6fd26a9640.mp3",
+      "duration": 1.608,
+      "isLinked": true
+    },
+    {
+      "id": "asset_688154_1768741886",
+      "name": "TTS: 阳光透过树梢",
+      "type": "audio",
+      "url": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_597d3c85-97f9-485a-a0e6-0e832d25b982.mp3",
+      "thumbnailUrl": "/api/media/serve?path=D%3A%5CDesktop%5CAIcut%5Cprojects%5Cdemo%5Cassets%5Caudio%5Ctts_597d3c85-97f9-485a-a0e6-0e832d25b982.mp3",
+      "filePath": "D:\\Desktop\\AIcut\\projects\\demo\\assets\\audio\\tts_597d3c85-97f9-485a-a0e6-0e832d25b982.mp3",
+      "duration": 2.016,
+      "isLinked": true
+    }
+  ]
+}
