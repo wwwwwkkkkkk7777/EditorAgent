@@ -1,4 +1,4 @@
-import { Hero } from "@/components/landing/hero";
+import { HomePage } from "@/components/landing/home-page";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
@@ -14,7 +14,7 @@ export default async function Home() {
   return (
     <div>
       <Header />
-      <Hero />
+      <HomePage />
       <Footer />
     </div>
   );

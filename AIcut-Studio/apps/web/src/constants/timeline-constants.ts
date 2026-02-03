@@ -24,12 +24,12 @@ export const TRACK_COLORS: Record<
 
 // Utility functions
 export function getTrackColors(type: TrackType) {
-  return TRACK_COLORS[type];
+  return TRACK_COLORS[type] || TRACK_COLORS.media; // fallback to media colors
 }
 
 export function getTrackElementClasses(type: TrackType) {
   const colors = getTrackColors(type);
-  return `${colors.background} ${colors.border}`;
+  return `${colors?.background || ""} ${colors?.border || ""}`;
 }
 
 // Track height definitions

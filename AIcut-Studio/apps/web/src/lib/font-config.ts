@@ -5,6 +5,8 @@ import {
   Playfair_Display,
   Comic_Neue,
   Outfit,
+  Space_Grotesk,
+  JetBrains_Mono,
 } from "next/font/google";
 
 // Configure all fonts
@@ -14,6 +16,8 @@ const roboto = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 const openSans = Open_Sans({ subsets: ["latin"] });
 const playfairDisplay = Playfair_Display({ subsets: ["latin"] });
 const comicNeue = Comic_Neue({ subsets: ["latin"], weight: ["400", "700"] });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
+const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 // Export font class mapping for use in components
 export const FONT_CLASS_MAP = {
@@ -23,6 +27,8 @@ export const FONT_CLASS_MAP = {
   "Open Sans": openSans.className,
   "Playfair Display": playfairDisplay.className,
   "Comic Neue": comicNeue.className,
+  "Space Grotesk": spaceGrotesk.className,
+  "JetBrains Mono": jetBrainsMono.className,
   Arial: "",
   Helvetica: "",
   "Times New Roman": "",
@@ -37,6 +43,8 @@ export const fonts = {
   openSans,
   playfairDisplay,
   comicNeue,
+  spaceGrotesk,
+  jetBrainsMono,
 };
 
 // Default font for the body

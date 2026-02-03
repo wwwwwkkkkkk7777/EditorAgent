@@ -6,6 +6,15 @@ import {
   PLANNING_PROMPT, 
   ACTION_GENERATION_PROMPT 
 } from "./prompts";
+import {
+  VideoAgentMode,
+  getModeConfig,
+  detectMode,
+  validateModeInputs,
+  createEditPlan,
+  convertEditPlanToActions,
+  EditPlan,
+} from "../videoagent/modes";
 import fs from "fs";
 import path from "path";
 
@@ -23,11 +32,19 @@ export interface AgentResponse {
   actions: AgentAction[];
 }
 
+/** VideoAgent 模式配置 */
+export interface VideoAgentModeOption {
+  mode: VideoAgentMode;
+  inputs?: Record<string, any>;
+}
+
 export class VideoEditorAgent {
   private client: OpenAI;
   private model: string;
+  private videoAgentMode: VideoAgentMode | null;
 
-  constructor() {
+  constructor(videoAgentMode?: VideoAgentMode) {
+    this.videoAgentMode = videoAgentMode || null;
     const groqKey = process.env.GROQ_API_KEY;
     const dashscopeKey = process.env.DASHSCOPE_API_KEY;
     const siliconKey = process.env.SILICONFLOW_API_KEY;
@@ -97,11 +114,149 @@ export class VideoEditorAgent {
   }
 
   /**
+   * 检测是否需要 VideoAgent 高级功能（根据关键词）
+   * @deprecated 使用 detectMode 代替，它会返回具体的模式
+   */
+  private detectVideoAgentIntent(message: string): boolean {
+    // 使用 modes.ts 中的 detectMode
+    return detectMode(message) !== null;
+  }
+
+  /**
+   * 根据消息内容自动检测 VideoAgent 模式
+   */
+  private autoDetectMode(message: string): VideoAgentMode | null {
+    return detectMode(message);
+  }
+
+  /**
+   * 调用 VideoAgent 处理复杂需求（模式化版本）
+   */
+  private async *processWithVideoAgent(
+    userMessage: string, 
+    snapshotContext: string,
+    mode: VideoAgentMode
+  ) {
+    const modeConfig = getModeConfig(mode);
+    yield { 
+      type: "phase", 
+      content: `${modeConfig.icon} 正在调用 VideoAgent ${modeConfig.name}...` 
+    };
+
+    try {
+      // 调用 VideoAgent API，传入模式约束
+      const response = await fetch("http://localhost:3000/api/videoagent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "processWithMode",
+          data: {
+            mode,
+            requirement: userMessage,
+            inputs: {
+              videoSource: "timeline", // 默认使用时间轴
+            },
+            context: { 
+              snapshot: snapshotContext,
+              allowedAgents: modeConfig.allowedAgents,
+            }
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`VideoAgent API 返回错误: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.status === "error") {
+        throw new Error(result.error || "VideoAgent 处理失败");
+      }
+
+      // 显示 VideoAgent 的分析结果
+      if (result.reasoning) {
+        yield { 
+          type: "thinking", 
+          content: `**${modeConfig.icon} ${modeConfig.name} 分析**\n\n${result.reasoning}` 
+        };
+      }
+
+      // 显示执行计划
+      if (result.agent_chain && result.agent_chain.length > 0) {
+        const planText = `**VideoAgent 工作流**\n\n模式: ${modeConfig.name}\n允许的 Agents: ${modeConfig.allowedAgents.join(", ")}\n\n${result.agent_chain.map((agent: string, i: number) => `${i + 1}. ${agent}`).join('\n')}`;
+        yield { type: "plan", content: planText };
+      }
+
+      // 将 VideoAgent 的 EditPlan 转换为 AIcut 动作
+      let actions: AgentAction[] = [];
+      if (result.editPlan) {
+        actions = convertEditPlanToActions(result.editPlan);
+        yield { type: "editPlan", content: result.editPlan };
+      } else {
+        // 兼容旧版本的结果格式
+        actions = this.convertVideoAgentToActions(result);
+      }
+      
+      yield { type: "actions", content: actions };
+
+    } catch (error: any) {
+      console.error("[Agent] VideoAgent error:", error);
+      yield { 
+        type: "thinking", 
+        content: `⚠️ VideoAgent ${modeConfig.name} 调用失败: ${error.message}\n\n将使用基础模式处理...` 
+      };
+      // 失败后回退到基础模式
+      return null;
+    }
+  }
+
+  /**
+   * 将 VideoAgent 结果转换为 AIcut 动作
+   */
+  private convertVideoAgentToActions(result: any): AgentAction[] {
+    const actions: AgentAction[] = [];
+    
+    // 如果 VideoAgent 生成了视频文件
+    if (result.result?.video_path) {
+      actions.push({
+        action: "importMedia",
+        data: {
+          filePath: result.result.video_path,
+          name: "VideoAgent 生成",
+          startTime: 0
+        }
+      });
+    }
+
+    // 如果 VideoAgent 生成了音频文件
+    if (result.result?.audio_path) {
+      actions.push({
+        action: "importAudio",
+        data: {
+          filePath: result.result.audio_path,
+          name: "VideoAgent 音频",
+          startTime: 0
+        }
+      });
+    }
+
+    // 如果没有具体的文件输出，返回一个提示动作
+    if (actions.length === 0 && result.agent_chain) {
+      // VideoAgent 已经完成处理，但可能需要用户手动操作
+      // 这里可以添加一些提示信息
+    }
+    
+    return actions;
+  }
+
+  /**
    * ReAct 风格的流式执行：
    * 1. 意图分析 - 判断是否需要工具
-   * 2. 思考 - 分析问题
-   * 3. 规划 - 制定步骤
-   * 4. 执行 - 生成动作序列
+   * 2. 检测是否需要 VideoAgent（根据模式或关键词）
+   * 3. 思考 - 分析问题
+   * 4. 规划 - 制定步骤
+   * 5. 执行 - 生成动作序列
    */
   async *processStream(userMessage: string) {
     const snapshotContext = this.getSnapshotContext();
@@ -128,6 +283,55 @@ export class VideoEditorAgent {
       console.log("[Agent] Intent Analysis:", intentAnalysis);
     } catch (e) {
       console.error("Failed to parse intent analysis", e);
+    }
+
+    // 检查是否有明确指定的 VideoAgent 模式
+    if (this.videoAgentMode) {
+      console.log(`[Agent] Using specified VideoAgent mode: ${this.videoAgentMode}`);
+      const modeConfig = getModeConfig(this.videoAgentMode);
+      
+      yield { 
+        type: "phase", 
+        content: `${modeConfig.icon} 使用 ${modeConfig.name}` 
+      };
+      
+      // 使用指定的模式处理
+      const videoAgentResult = yield* this.processWithVideoAgent(
+        userMessage, 
+        snapshotContext, 
+        this.videoAgentMode
+      );
+      
+      if (videoAgentResult !== null) {
+        return; // VideoAgent 成功处理
+      }
+      // 失败后继续使用基础模式
+      console.log("[Agent] VideoAgent failed, falling back to basic mode");
+    } else {
+      // 没有指定模式时，尝试自动检测
+      const detectedMode = this.autoDetectMode(userMessage);
+      
+      if (detectedMode) {
+        console.log(`[Agent] Auto-detected VideoAgent mode: ${detectedMode}`);
+        const modeConfig = getModeConfig(detectedMode);
+        
+        yield { 
+          type: "phase", 
+          content: `检测到 ${modeConfig.icon} ${modeConfig.name} 相关需求` 
+        };
+        
+        // 使用检测到的模式处理
+        const videoAgentResult = yield* this.processWithVideoAgent(
+          userMessage, 
+          snapshotContext, 
+          detectedMode
+        );
+        
+        if (videoAgentResult !== null) {
+          return;
+        }
+        console.log("[Agent] VideoAgent failed, falling back to basic mode");
+      }
     }
 
     // 如果不需要工具，直接回答

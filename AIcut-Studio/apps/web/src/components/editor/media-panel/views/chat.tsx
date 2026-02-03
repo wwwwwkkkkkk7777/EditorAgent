@@ -60,7 +60,9 @@ export function ChatView() {
 - 为这段视频生成字幕
 - 分析一下 BGM 的节拍
 - 生成一段"欢迎观看"的语音
-- 调低一点音量`,
+- 调低一点音量
+
+💡 高级功能请使用左侧"导演"面板`,
       },
     ];
   });
@@ -69,7 +71,7 @@ export function ChatView() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 保存聊天记录到 localStorage（使用 useRef 避免无限循环）
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout>(undefined);
   useEffect(() => {
     if (typeof window !== "undefined") {
       // 防抖保存，避免频繁写入

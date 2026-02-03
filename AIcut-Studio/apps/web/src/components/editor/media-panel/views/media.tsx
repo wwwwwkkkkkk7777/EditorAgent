@@ -15,7 +15,8 @@ import {
   Video,
 } from "lucide-react";
 import { generateThumbnail, getVideoInfo } from "@/lib/mediabunny-utils";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useCallback } from "react";
+import { generateVideoSummary } from "@/lib/video-summary/service";
 import { Sparkles, Video as VideoIcon } from "lucide-react";
 import { GenerateImageDialog } from "../dialogs/generate-image-dialog";
 import { GenerateVideoDialog } from "../dialogs/generate-video-dialog";
@@ -271,6 +272,25 @@ export function MediaView() {
           throw new Error(`Upload failed for ${file.name}`);
         }
 
+        const uploadResult = await response.json();
+
+        // 异步触发视频摘要生成（不阻塞上传流程）
+        if (file.type.startsWith("video/")) {
+          const videoPath = uploadResult.url || filePath || file.name;
+          console.log(`[Media Import] Triggering async summary generation for: ${videoPath}`);
+          generateVideoSummary(videoPath, activeProject.id)
+            .then((result) => {
+              if (result.success) {
+                console.log(`[Media Import] Summary generated for ${file.name}:`, result.cached ? "(cached)" : "(new)");
+              } else {
+                console.warn(`[Media Import] Summary generation failed for ${file.name}:`, result.error);
+              }
+            })
+            .catch((err) => {
+              console.warn(`[Media Import] Summary generation error for ${file.name}:`, err);
+            });
+        }
+
         setProgress(Math.round(((i + 1) / total) * 100));
       }
 
@@ -374,6 +394,25 @@ export function MediaView() {
 
         if (!response.ok) {
           throw new Error(`Link failed for ${fileName}`);
+        }
+
+        const uploadResult = await response.json();
+
+        // 异步触发视频摘要生成（不阻塞上传流程）
+        if (isVideo) {
+          const videoPath = filePath; // 使用原始文件路径
+          console.log(`[Media Import] Triggering async summary generation for linked file: ${videoPath}`);
+          generateVideoSummary(videoPath, activeProject.id)
+            .then((result) => {
+              if (result.success) {
+                console.log(`[Media Import] Summary generated for ${fileName}:`, result.cached ? "(cached)" : "(new)");
+              } else {
+                console.warn(`[Media Import] Summary generation failed for ${fileName}:`, result.error);
+              }
+            })
+            .catch((err) => {
+              console.warn(`[Media Import] Summary generation error for ${fileName}:`, err);
+            });
         }
 
         setProgress(Math.round(((i + 1) / total) * 100));

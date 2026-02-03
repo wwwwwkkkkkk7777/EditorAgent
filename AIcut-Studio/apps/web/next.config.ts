@@ -14,6 +14,12 @@ const nextConfig = (phase: string): NextConfig => {
     reactStrictMode: true,
     productionBrowserSourceMaps: true,
     ...(isStaticExport && { output: "export" }),
+    // 允许更长的 API 路由执行时间（用于 VideoAgent 视频处理）
+    experimental: {
+      serverActions: {
+        bodySizeLimit: '50mb',
+      },
+    },
     typescript: {
       ignoreBuildErrors: true,
     },

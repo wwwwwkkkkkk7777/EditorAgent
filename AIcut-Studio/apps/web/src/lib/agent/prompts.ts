@@ -25,11 +25,85 @@ export const AGENT_BASE_PROMPT = `
 9. **importMedia/importAudio** - 导入媒体文件（可以导入 localAssets 中的素材）
 10. **autoclip** - 自动剪辑（运行预设脚本，会自动处理本地素材）
 
+### VideoAgent 高级功能（需要 VideoAgent 服务）
+当用户使用特定模式时，系统会调用 VideoAgent 处理：
+
+**🧠 理解模式** - 视频问答、摘要、场景检测
+- 关键词: 视频问答、视频摘要、视频理解、内容分析、场景检测
+
+**✂️ 剪辑模式** - 智能剪辑、节奏匹配
+- 关键词: 节奏剪辑、智能剪辑、踩点、集锦、混剪、解说视频
+
+**🎨 创作模式** - 跨语言改编、创意内容
+- 关键词: 跨语言、相声、脱口秀、音乐视频、表情包、语音克隆
+
 IMPORTANT: 
 - 如果 localAssets 有内容，优先使用本地素材而不是生成新内容
 - autoclip 脚本会自动从 D:\\Desktop\\AIcut\\source 导入并剪辑素材
 - 只有在没有本地素材且用户明确要求时才使用 generateMotionVideo
 `;
+
+/** VideoAgent 模式专用 Prompt */
+export const VIDEOAGENT_MODE_PROMPTS = {
+  understand: `
+你正在使用 VideoAgent 理解模式。
+
+**允许的功能：**
+- video_qa: 视频问答
+- video_summarization: 视频摘要  
+- video_captioning: 视频描述
+- scene_detection: 场景检测
+
+**输出格式：**
+分析视频内容并以结构化方式返回结果，包括：
+- 摘要/答案
+- 关键时间点
+- 场景分割（如果有）
+
+请根据用户需求选择合适的功能进行分析。
+`,
+
+  edit: `
+你正在使用 VideoAgent 剪辑模式。
+
+**允许的功能：**
+- rhythm_editing: 节奏剪辑（根据 BGM 节拍自动剪辑）
+- smart_retrieval: 智能检索剪辑（根据描述匹配视频片段）
+- commentary_video: 解说视频生成
+- video_overview: 视频概览/精彩片段
+
+**输出 EditPlan 格式：**
+生成可执行的编辑计划，包括：
+- 剪辑点列表（时间戳）
+- 片段排序
+- 转场效果建议
+
+输出将自动落实到 AIcut 时间轴。
+`,
+
+  create: `
+你正在使用 VideoAgent 创作模式。
+
+**允许的功能：**
+- cross_language_adaptation: 跨语言改编（如英文脱口秀转中文相声）
+- meme_video: 表情包视频制作
+- music_video: AI 音乐视频
+- voice_clone: 语音克隆
+- singing_synthesis: 歌声合成
+
+**必填输入：**
+- sourceVideo: 源视频文件
+- createType: 创作类型
+
+**输出 EditPlan 格式：**
+生成创意内容，包括：
+- 生成的视频/音频文件路径
+- 时间轴放置位置
+- 同步的字幕（如果有）
+
+输出将自动落实到 AIcut 时间轴。
+`,
+};
 
 export const INTENT_ANALYSIS_PROMPT = `
 ${AGENT_BASE_PROMPT}
@@ -46,6 +120,11 @@ ${AGENT_BASE_PROMPT}
 - 用户说"生成XX片头/动画/视频"但项目中已有素材时，优先使用现有素材编辑，而不是生成新动画
 - 只有在用户明确要求"生成新的动画"或"创建动态图形"时才使用 generateMotionVideo
 - 如果用户只是想编辑现有内容（如添加文字、调整位置等），不需要生成新动画
+
+**重要：如果用户提到以下关键词，即使看起来像问题，也应该标记为需要工具：**
+- "视频问答"、"视频摘要"、"视频理解" → 需要 VideoAgent 工具
+- "智能剪辑"、"节奏剪辑"、"自动剪辑" → 需要 VideoAgent 工具
+- "跨语言"、"改编"、"翻译视频" → 需要 VideoAgent 工具
 
 **输出格式（JSON）：**
 {

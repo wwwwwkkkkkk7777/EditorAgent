@@ -9,6 +9,7 @@ const WORKSPACE_ROOT = path.join(process.cwd(), "../../../");
 const EDITS_DIR = path.join(WORKSPACE_ROOT, "ai_workspace");
 const PENDING_EDITS_FILE = path.join(EDITS_DIR, "pending-edits.json");
 const SNAPSHOT_FILE = path.join(EDITS_DIR, "project-snapshot.json");
+const SUMMARIES_DIR = path.join(EDITS_DIR, "video_summaries");
 const LOCAL_SOURCE_DIR = "D:\\Desktop\\AIcut\\source";
 
 interface PendingEdit {
@@ -134,6 +135,115 @@ const scanLocalAssets = () => {
   }
 
   return localAssets;
+};
+
+/**
+ * 加载项目中的视频摘要
+ */
+const loadVideoSummaries = (projectId?: string) => {
+  const summaries: any[] = [];
+  
+  if (!fs.existsSync(SUMMARIES_DIR)) {
+    return summaries;
+  }
+
+  try {
+    const files = fs.readdirSync(SUMMARIES_DIR).filter(f => f.endsWith(".json"));
+    
+    for (const file of files) {
+      try {
+        const content = JSON.parse(fs.readFileSync(path.join(SUMMARIES_DIR, file), "utf-8"));
+        if (!projectId || content.projectId === projectId) {
+          summaries.push(content);
+        }
+      } catch (e) {
+        // 忽略解析错误
+      }
+    }
+  } catch (err) {
+    console.error("[Agent] Failed to load video summaries:", err);
+  }
+
+  return summaries;
+};
+
+/**
+ * 基于规则的意图分类
+ */
+const classifyIntent = (message: string): { intent: "video_content" | "editing" | "other", confidence: number } => {
+  const lowerMessage = message.toLowerCase();
+
+  // 视频内容相关关键词
+  const videoContentKeywords = [
+    "视频讲", "视频说", "视频内容", "视频里", "视频中",
+    "讲了什么", "说了什么", "有什么", "在说什么", "关于什么",
+    "主题是", "人物", "角色", "提到", "出现",
+    "几分钟", "第几秒", "什么时候", "哪里说",
+    "摘要", "总结", "概述", "大意",
+  ];
+
+  // 编辑操作相关关键词
+  const editingKeywords = [
+    "剪辑", "剪切", "裁剪", "删除", "移除",
+    "添加", "插入", "加入", "放入",
+    "调整", "修改", "改变", "更改",
+    "音量", "速度", "亮度", "对比度",
+    "转场", "特效", "滤镜", "字幕", "标题",
+    "导出", "渲染", "合并", "分割",
+    "节奏", "配乐", "配音", "解说", "生成",
+    "调低", "调高", "缩短", "加长", "拉伸",
+  ];
+
+  let videoContentScore = 0;
+  let editingScore = 0;
+
+  for (const keyword of videoContentKeywords) {
+    if (lowerMessage.includes(keyword)) {
+      videoContentScore += 1;
+    }
+  }
+
+  for (const keyword of editingKeywords) {
+    if (lowerMessage.includes(keyword)) {
+      editingScore += 1;
+    }
+  }
+
+  if (editingScore > videoContentScore && editingScore > 0) {
+    return { intent: "editing", confidence: Math.min(0.9, 0.5 + editingScore * 0.1) };
+  } else if (videoContentScore > 0) {
+    return { intent: "video_content", confidence: Math.min(0.9, 0.5 + videoContentScore * 0.1) };
+  } else {
+    return { intent: "other", confidence: 0.6 };
+  }
+};
+
+/**
+ * 构建视频内容上下文
+ */
+const buildVideoContentContext = (summaries: any[]): string => {
+  if (summaries.length === 0) {
+    return "";
+  }
+
+  let context = "以下是项目中视频的摘要和转录内容：\n\n";
+
+  for (const summary of summaries) {
+    const videoName = summary.videoPath?.split(/[\\/]/).pop() || "视频";
+    context += `## 视频: ${videoName}\n`;
+    
+    if (summary.summary) {
+      context += `### 摘要:\n${summary.summary}\n\n`;
+    }
+    
+    if (summary.transcript) {
+      context += `### 转录内容:\n${summary.transcript}\n\n`;
+    }
+    
+    context += "---\n\n";
+  }
+
+  return context;
 };
 
 const loadSnapshot = () => {
@@ -663,14 +773,138 @@ async function executeAction(actionObj: any, request: NextRequest, pendingEdits:
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
-    console.log(`[Agent Chat] Processing: "${message}"`);
+    const body = await request.json();
+    const { message, videoAgentMode, directActions } = body;
+    const url = new URL(request.url);
+    const modeFromQuery = url.searchParams.get("mode") || "basic";
+    
+    // 优先使用 body 中的 videoAgentMode，其次使用 query 参数
+    const mode = videoAgentMode || modeFromQuery;
+    
+    console.log(`[Agent Chat] Processing: "${message?.substring(0, 50) || 'directActions'}" (mode: ${mode})`);
+
+    // 处理直接动作请求（来自 VideoAgent 面板）
+    if (directActions && Array.isArray(directActions) && directActions.length > 0) {
+      console.log(`[Agent Chat] Direct actions: ${directActions.length} actions`);
+      
+      const pendingEdits = loadPendingEdits();
+      const results: string[] = [];
+      
+      for (const actionObj of directActions) {
+        try {
+          const result = await executeAction(actionObj, request, pendingEdits);
+          results.push(result);
+        } catch (error: any) {
+          results.push(`❌ ${actionObj.action} 失败: ${error.message}`);
+        }
+      }
+      
+      // 保存所有编辑
+      savePendingEdits(pendingEdits);
+      
+      return NextResponse.json({
+        success: true,
+        results,
+        message: `已执行 ${directActions.length} 个动作`,
+      });
+    }
+
+    // --- 意图分类 ---
+    // 对用户消息进行意图分类：video_content / editing / other
+    const intentResult = classifyIntent(message);
+    console.log(`[Agent Chat] Intent: ${intentResult.intent} (confidence: ${intentResult.confidence})`);
+
+    // 如果是视频内容相关问题，加载视频摘要作为上下文
+    if (intentResult.intent === "video_content") {
+      const projectId = resolveProjectId();
+      const summaries = loadVideoSummaries(projectId);
+      
+      if (summaries.length > 0) {
+        const videoContext = buildVideoContentContext(summaries);
+        
+        // 构建带上下文的回答
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async start(controller) {
+            try {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ phase: "正在分析视频内容..." })}\n\n`));
+              
+              // 使用 agent 的直接回答能力，将视频摘要作为上下文
+              const contextualMessage = `根据以下视频内容信息回答用户的问题。\n\n${videoContext}\n\n用户问题：${message}`;
+              
+              const agentInstance = new VideoEditorAgent("understand");
+              const generator = agentInstance.processStream(contextualMessage);
+              
+              for await (const chunk of generator) {
+                if (chunk.type === 'phase') {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ phase: chunk.content })}\n\n`));
+                } else if (chunk.type === 'answer') {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ answer: chunk.content })}\n\n`));
+                } else if (chunk.type === 'thinking') {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ thinking: chunk.content })}\n\n`));
+                }
+              }
+              
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, hasAction: false })}\n\n`));
+              controller.close();
+            } catch (err: any) {
+              console.error("[Agent Chat] Video content error:", err);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ answer: `抱歉，分析视频内容时出错了: ${err.message}` })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, hasAction: false })}\n\n`));
+              controller.close();
+            }
+          }
+        });
+
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        });
+      } else {
+        // 没有视频摘要，提示用户
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async start(controller) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              answer: "当前项目没有可用的视频摘要。请先导入视频素材，系统会自动分析视频内容。\n\n💡 提示：导入视频后，你可以问我：\n- 这个视频讲了什么？\n- 视频里有哪些人物？\n- 视频的主题是什么？" 
+            })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, hasAction: false })}\n\n`));
+            controller.close();
+          }
+        });
+
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        });
+      }
+    }
+
+    // --- 编辑或其他意图 ---
+    // 根据模式创建不同的 agent
+    // mode 可以是: "basic" | "understand" | "edit" | "create" | "videoagent"（兼容旧版）
+    let agentInstance;
+    if (mode === "basic") {
+      agentInstance = agent;  // 使用默认 agent
+    } else if (mode === "videoagent") {
+      // 兼容旧版 videoagent 模式，自动检测
+      agentInstance = new VideoEditorAgent();
+    } else {
+      // 新版模式化调用: understand, edit, create
+      agentInstance = new VideoEditorAgent(mode as "understand" | "edit" | "create");
+    }
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const generator = agent.processStream(message);
+          const generator = agentInstance.processStream(message);
           const pendingEdits = loadPendingEdits();
           
           let actions: any[] = [];
@@ -687,6 +921,12 @@ export async function POST(request: NextRequest) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ thinking: chunk.content })}\n\n`));
             } else if (chunk.type === 'plan') {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ plan: chunk.content })}\n\n`));
+            } else if (chunk.type === 'editPlan') {
+              // VideoAgent 返回的 EditPlan，发送给前端显示
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                editPlan: chunk.content,
+                phase: `EditPlan 已生成，正在落实到时间轴...`
+              })}\n\n`));
             } else if (chunk.type === 'actions') {
               actions = chunk.content as any[];
               

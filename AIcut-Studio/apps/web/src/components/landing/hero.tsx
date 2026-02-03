@@ -16,7 +16,7 @@ export function Hero() {
       {/* Dynamic Background */}
       <div className="absolute inset-0 -z-50 h-full w-full bg-background">
         <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-        <div className="absolute left-0 right-0 top-[-10%] m-auto h-[400px] w-[400px] rounded-full bg-violet-500/20 blur-[80px]" />
+        <div className="absolute left-0 right-0 top-[-10%] m-auto h-[400px] w-[400px] rounded-full bg-white/20 blur-[80px]" />
       </div>
 
       <motion.div
@@ -34,7 +34,7 @@ export function Hero() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/80 border border-border/50 backdrop-blur-sm shadow-sm transition-colors hover:bg-secondary/60">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
             <span className="text-sm font-medium bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
               AI Agent 引擎已就绪 (v0.1.0)
@@ -49,21 +49,8 @@ export function Hero() {
           className="flex flex-col items-center font-bold tracking-tighter text-5xl md:text-7xl lg:text-8xl"
         >
           <h1 className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent pb-2">
-            AIcut X AI驱动剪辑师
+            Ascendflow X AI驱动剪辑师
           </h1>
-          <div className="relative">
-            <Handlebars>全自动智能剪辑</Handlebars>
-            {/* Decorative element for "Code" feel */}
-            <div className="absolute -right-8 -top-8 text-violet-500/20 rotate-12 pointer-events-none select-none">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-                <path d="M16 13H8" />
-                <path d="M16 17H8" />
-                <path d="M10 9H8" />
-              </svg>
-            </div>
-          </div>
         </motion.div>
 
         <motion.p

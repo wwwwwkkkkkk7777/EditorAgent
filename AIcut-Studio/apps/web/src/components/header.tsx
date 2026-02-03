@@ -16,41 +16,21 @@ export function Header() {
         width={32}
         height={32}
       />
-      <span className="text-xl font-medium hidden md:block">AIcut</span>
+      <span className="text-xl font-medium hidden md:block">Ascendflow AI Cut</span>
     </Link>
   );
 
-  const rightContent = (
-    <nav className="flex items-center gap-2">
-      <div className="flex items-center gap-4">
-        <Link href="/blog">
-          <Button variant="text" className="text-sm p-0">
-            博客
-          </Button>
-        </Link>
-        <Link href="/contributors">
-          <Button variant="text" className="text-sm p-0">
-            贡献者
-          </Button>
-        </Link>
-      </div>
-      <Link href="/projects">
-        <Button size="sm" className="text-sm ml-2">
-          项目
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </Link>
-      <ThemeToggle className="mr-2" />
-    </nav>
-  );
+  const rightContent = null;
 
   return (
-    <div className="sticky top-4 z-50 mx-4 md:mx-0">
-      <HeaderBase
-        className="bg-background border rounded-2xl max-w-3xl mx-auto mt-4 pl-4 pr-[11px]"
-        leftContent={leftContent}
-        rightContent={rightContent}
-      />
+    <div className="sticky top-6 z-50 px-4 pointer-events-none">
+      <div className="pointer-events-auto">
+        <HeaderBase
+          className="bg-background/70 backdrop-blur-xl border border-border/40 rounded-full max-w-4xl mx-auto h-16 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] supports-[backdrop-filter]:bg-background/40"
+          leftContent={leftContent}
+          rightContent={rightContent}
+        />
+      </div>
     </div>
   );
 }

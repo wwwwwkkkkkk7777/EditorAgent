@@ -109,3 +109,5 @@ debug_import.log
 *.mov
 *.mkv
 
+VideoAgent/
+

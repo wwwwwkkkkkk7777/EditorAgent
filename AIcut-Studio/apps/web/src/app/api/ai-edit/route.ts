@@ -583,6 +583,144 @@ export async function POST(request: NextRequest) {
                 // These are fine as-is
                 break;
 
+            case "createProjectWithAssets": {
+                // 创建新项目并导入素材（用于智能剪辑完成后）
+                const { projectName, assets, addToTimeline, workflowResults } = data;
+                
+                if (!projectName) {
+                    return NextResponse.json({
+                        success: false,
+                        error: "Missing 'projectName' in data",
+                    }, { status: 400 });
+                }
+
+                try {
+                    // 生成项目 ID
+                    const projectId = `smart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    const folderName = projectName.replace(/[<>:"/\\|?*]/g, "_");
+                    const projectPath = path.join(PROJECTS_DIR, folderName);
+                    
+                    // 创建项目目录
+                    if (!fs.existsSync(projectPath)) {
+                        fs.mkdirSync(projectPath, { recursive: true });
+                    }
+                    
+                    // 创建项目数据
+                    const projectData = {
+                        id: projectId,
+                        name: projectName,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        fps: 30,
+                        width: 1920,
+                        height: 1080,
+                        scenes: [{
+                            id: "scene_1",
+                            name: "主场景",
+                            duration: 0,
+                        }],
+                        currentSceneId: "scene_1",
+                    };
+                    
+                    // 准备素材和时间轴数据
+                    const tracks: any[] = [];
+                    const importedAssets: any[] = [];
+                    let currentTime = 0;
+                    
+                    if (assets && Array.isArray(assets)) {
+                        for (const asset of assets) {
+                            const assetId = `asset_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+                            
+                            // 将本地路径转换为可访问的 URL
+                            const serveUrl = `/api/media/serve?path=${encodeURIComponent(asset.path)}`;
+                            
+                            // 添加到素材列表
+                            importedAssets.push({
+                                id: assetId,
+                                type: asset.type || "video",
+                                name: asset.name || path.basename(asset.path),
+                                path: asset.path,
+                                url: serveUrl, // 使用 serve API 提供文件
+                            });
+                            
+                            // 如果需要添加到时间轴
+                            if (addToTimeline) {
+                                const trackType = asset.type === "audio" ? "audio" : "video";
+                                let track = tracks.find(t => t.type === trackType);
+                                
+                                if (!track) {
+                                    track = {
+                                        id: `track_${trackType}_${Date.now()}`,
+                                        type: trackType,
+                                        name: trackType === "audio" ? "音频轨道" : "视频轨道",
+                                        elements: [],
+                                    };
+                                    tracks.push(track);
+                                }
+                                
+                                // 添加元素到轨道
+                                track.elements.push({
+                                    id: `element_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                                    type: asset.type || "video",
+                                    assetId,
+                                    startTime: currentTime,
+                                    duration: asset.duration || 10, // 默认 10 秒
+                                    name: asset.name || path.basename(asset.path),
+                                    path: asset.path,
+                                    url: serveUrl, // 使用 serve API 提供文件
+                                });
+                                
+                                if (asset.type !== "audio") {
+                                    currentTime += asset.duration || 10;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 保存项目快照
+                    const snapshotData = {
+                        project: projectData,
+                        tracks,
+                        assets: importedAssets,
+                        workflowResults, // 保存工作流结果供参考
+                        timestamp: Date.now(),
+                    };
+                    
+                    fs.writeFileSync(
+                        path.join(projectPath, "project.json"),
+                        JSON.stringify(snapshotData, null, 2)
+                    );
+                    
+                    // 更新 ID 映射
+                    saveToIdMap(folderName, projectId);
+                    
+                    // 同时更新 workspace snapshot
+                    backupSnapshot();
+                    fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(snapshotData, null, 2));
+                    
+                    // 通知前端刷新项目列表
+                    fs.writeFileSync(SYNC_FILE, JSON.stringify({
+                        action: "refreshProjects",
+                        newProjectId: projectId,
+                    }, null, 2));
+                    
+                    console.log(`[AI Edit] Created project: ${projectName} (${projectId})`);
+                    
+                    return NextResponse.json({
+                        success: true,
+                        projectId,
+                        folderName,
+                        message: `Created project "${projectName}" with ${importedAssets.length} assets`,
+                    });
+                } catch (e) {
+                    console.error("[AI Edit] Failed to create project:", e);
+                    return NextResponse.json({
+                        success: false,
+                        error: `Failed to create project: ${e}`,
+                    }, { status: 500 });
+                }
+            }
+
             case "setFullState": {
                 if (!data?.tracks) {
                     return NextResponse.json({
@@ -630,6 +768,19 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({ success: true });
                 } catch (e) {
                     return NextResponse.json({ success: false, error: "Failed to save snapshot" }, { status: 500 });
+                }
+            }
+
+            case "forceRefresh": {
+                // 强制前端刷新（通过写入 sync-input.json）
+                try {
+                    fs.writeFileSync(SYNC_FILE, JSON.stringify({
+                        action: "forceRefresh",
+                        timestamp: data?.timestamp || Date.now(),
+                    }, null, 2));
+                    return NextResponse.json({ success: true, message: "Force refresh triggered" });
+                } catch (e) {
+                    return NextResponse.json({ success: false, error: "Failed to trigger refresh" }, { status: 500 });
                 }
             }
 
