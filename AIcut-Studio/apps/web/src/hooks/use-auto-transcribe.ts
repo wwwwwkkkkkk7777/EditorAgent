@@ -121,37 +121,65 @@ export function useAutoTranscribe() {
     previousMainTrackElements.current = currentElementIds;
   }, [tracks, mediaFiles, clearSegments, clearSegmentsForElement]);
 
+  
+  const resolveMediaPath = (url?: string, media?: { filePath?: string; originalPath?: string }) => {
+    if (media?.filePath) return media.filePath;
+    if (media?.originalPath) return media.originalPath;
+    if (!url) return null;
+
+    try {
+      const parsed = new URL(url, window.location.origin);
+      const pathParam = parsed.searchParams.get("path");
+      if (pathParam) {
+        return decodeURIComponent(pathParam);
+      }
+      if (url.startsWith("file://")) {
+        return decodeURIComponent(parsed.pathname).replace(/^\/(?:[A-Za-z]:)/, (m) => m.slice(1));
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  };
+
   const transcribeElement = async (elementId: string, mediaId: string, mediaUrl: string) => {
     try {
-      setTranscribing(true, "正在提取音频...");
-      
-      // 获取音频文件
-      const response = await fetch(mediaUrl);
-      if (!response.ok) throw new Error("无法获取音频文件");
-      const audioBlob = await response.blob();
+      const media = mediaFiles.find(m => m.id === mediaId);
+      const localPath = resolveMediaPath(mediaUrl, media);
 
-      setTranscribing(true, "正在上传音频...");
+      let fileName = "";
+      if (localPath) {
+        fileName = localPath;
+      } else {
+        setTranscribing(true, "?????????...");
+        
+        // ?????????
+        const response = await fetch(mediaUrl);
+        if (!response.ok) throw new Error("????????????");
+        const audioBlob = await response.blob();
 
-      // 上传音频
-      const formData = new FormData();
-      formData.append("file", audioBlob, `${elementId}.wav`);
-      formData.append("name", elementId);
+        setTranscribing(true, "?????????...");
 
-      const uploadResponse = await fetch("/api/media/upload-local", {
-        method: "POST",
-        body: formData,
-      });
+        // ??????
+        const formData = new FormData();
+        formData.append("file", audioBlob, `${elementId}.wav`);
+        formData.append("name", elementId);
 
-      if (!uploadResponse.ok) throw new Error("音频上传失败");
-      const { url } = await uploadResponse.json();
-      
-      // 提取文件路径
-      const urlObj = new URL(url, window.location.origin);
-      const fileName = urlObj.searchParams.get("path") || "";
+        const uploadResponse = await fetch("/api/media/upload-local", {
+          method: "POST",
+          body: formData,
+        });
 
-      setTranscribing(true, "正在转录字幕...");
+        if (!uploadResponse.ok) throw new Error("?????????");
+        const { url } = await uploadResponse.json();
+        
+        // ?????????
+        const urlObj = new URL(url, window.location.origin);
+        fileName = urlObj.searchParams.get("path") || "";
+      }
 
-      // 调用转录API
+      setTranscribing(true, "?????????...");
+
       const transcriptionResponse = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

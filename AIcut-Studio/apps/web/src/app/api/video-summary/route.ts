@@ -15,6 +15,7 @@ const VIDEOAGENT_API_URL = process.env.VIDEOAGENT_API_URL || "http://localhost:8
 // 摘要存储目录
 const WORKSPACE_ROOT = path.join(process.cwd(), "../../../");
 const SUMMARIES_DIR = path.join(WORKSPACE_ROOT, "ai_workspace", "video_summaries");
+const TRANSCRIPTS_DIR = path.join(WORKSPACE_ROOT, "ai_workspace", "video_transcripts");
 
 // 确保目录存在
 if (!fs.existsSync(SUMMARIES_DIR)) {
@@ -34,6 +35,10 @@ function getSummaryFilePath(videoId: string): string {
 function generateVideoId(videoPath: string): string {
   const crypto = require("crypto");
   return crypto.createHash("md5").update(videoPath).digest("hex").substring(0, 12);
+}
+
+function getTranscriptTxtPath(videoId: string): string {
+  return path.join(TRANSCRIPTS_DIR, `${videoId}.txt`);
 }
 
 // Resolve input videoPath to a local filesystem path when possible
@@ -113,6 +118,9 @@ export async function POST(request: NextRequest) {
 
           const stat = fs.statSync(targetPath);
           const videoDir = stat.isDirectory() ? targetPath : path.dirname(targetPath);
+          const transcriptTxtPath = getTranscriptTxtPath(videoId);
+          const hasCachedTranscript = fs.existsSync(transcriptTxtPath);
+          const videoInputPath = hasCachedTranscript ? transcriptTxtPath : videoDir;
           const response = await fetch(`${VIDEOAGENT_API_URL}/api/videoagent/execute-tool`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
               tool_name: "VideoSummarizationGenerator",
               params: {
                 user_idea: "生成视频内容摘要，提取关键信息、人物、场景和对话",
-                video_dir: videoDir,
+                video_dir: videoInputPath,
                 present_style_path: "default",
                 output_path: `dataset/video_edit/writing_data/summary_${videoId}.json`,
               },
@@ -138,15 +146,19 @@ export async function POST(request: NextRequest) {
           }
 
           // 保存摘要结果
+          const cachedTranscript = hasCachedTranscript
+            ? fs.readFileSync(transcriptTxtPath, "utf-8")
+            : "";
+
           const summaryData = {
             videoId,
             videoPath: resolvedVideoPath || videoPath,
             projectId,
             generatedAt: Date.now(),
             summary: result.result?.content_output?.content_created || "",
-            transcript: result.result?.transcript || "",
+            transcript: result.result?.transcript || cachedTranscript || "",
             processedVideos: result.result?.processed_videos || [],
-            transcriptSource: result.result?.transcript_source || "unknown",
+            transcriptSource: result.result?.transcript_source || (hasCachedTranscript ? "cached_transcript" : "unknown"),
           };
 
           fs.writeFileSync(summaryPath, JSON.stringify(summaryData, null, 2));
