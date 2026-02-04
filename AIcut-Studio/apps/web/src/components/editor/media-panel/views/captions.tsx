@@ -8,6 +8,7 @@ import { encryptWithRandomKey, arrayBufferToBase64 } from "@/lib/zk-encryption";
 import { useTimelineStore } from "@/stores/timeline-store";
 import { useMediaStore } from "@/stores/media-store";
 import { usePlaybackStore } from "@/stores/playback-store";
+import { useCaptionStore } from "@/stores/caption-store";
 import { DEFAULT_TEXT_ELEMENT } from "@/constants/text-constants";
 import { Loader2, Shield, Trash2, Upload, Play, Plus } from "lucide-react";
 import {
@@ -41,15 +42,14 @@ export function Captions() {
   const [error, setError] = useState<string | null>(null);
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false);
-  const [transcribedSegments, setTranscribedSegments] = useState<Array<{
-    text: string;
-    startTime: number;
-    duration: number;
-  }>>([]);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const { insertTrackAt, insertTrackWithElements, tracks } = useTimelineStore();
   const { mediaFiles } = useMediaStore();
   const { seek, currentTime } = usePlaybackStore();
+  
+  // 使用 caption store
+  const { segments: transcribedSegments, isTranscribing, transcriptionProgress } = useCaptionStore();
 
   // Check if user has already accepted privacy on mount
   useEffect(() => {
@@ -212,12 +212,21 @@ export function Captions() {
       </div>
 
       <div className="flex-1 overflow-y-auto my-2 space-y-2 pr-2 custom-scrollbar">
+        {isTranscribing && (
+          <div className="p-3 bg-primary/10 border border-primary/20 rounded-md mb-2">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <p className="text-sm">{transcriptionProgress || "正在转录..."}</p>
+            </div>
+          </div>
+        )}
+        
         {transcribedSegments.length > 0 ? (
           transcribedSegments.map((segment, index) => {
             const isActive = currentTime >= segment.startTime && currentTime < (segment.startTime + segment.duration);
             return (
               <div
-                key={index}
+                key={segment.id || index}
                 className={`p-3 rounded-lg border transition-all cursor-pointer group ${isActive
                     ? "bg-primary/10 border-primary/50"
                     : "bg-foreground/5 border-transparent hover:border-foreground/20"
@@ -241,7 +250,9 @@ export function Captions() {
               <Plus className="w-6 h-6 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">
-              尚未生成字幕内容。<br />点击下方按钮开始智能识别。
+              {isTranscribing 
+                ? "正在自动识别视频字幕..." 
+                : "添加视频到时间轴将自动转录字幕"}
             </p>
           </div>
         )}

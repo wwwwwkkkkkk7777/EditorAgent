@@ -434,30 +434,30 @@ export function useAIEditSync(enabled: boolean = true) {
                         if (!targetTrack) {
                             const targetTrackType = mediaType === "audio" ? "audio" : "media";
 
-                            // 尝试找一个有空位的或者同类型的
-                            // 优先找命名符合意图的
                             if (mediaType === "audio") {
                                 targetTrack = store.tracks.find(t => t.name === "AI 语音轨");
-                            }
-
-                            if (!targetTrack) {
-                                // 找任意同类型轨道
-                                targetTrack = store.tracks.find(t => t.type === targetTrackType && !t.isMain); // Try non-main first
-                            }
-
-                            // 如果还是没有，或者是 Main track (Video Track) 且允许
-                            if (!targetTrack) {
-                                targetTrack = store.tracks.find(t => t.type === targetTrackType);
-                            }
-
-                            // 最后还没找到，新建一个
-                            if (!targetTrack) {
-                                const newTrackId = store.addTrack(targetTrackType);
-                                if (mediaType === "audio") {
-                                    store.updateTrack(newTrackId, { name: "AI 语音轨" });
+                            } else {
+                                // 视频：始终优先使用 Main Track
+                                let mainTrack = store.tracks.find(t => t.isMain || t.name === "Main Track");
+                                if (!mainTrack) {
+                                    // 没有主轨道就新建
+                                    const newTrackId = store.addTrack("media");
+                                    store.updateTrack(newTrackId, { isMain: true, name: "Main Track" });
+                                    mainTrack = store.tracks.find(t => t.id === newTrackId);
                                 }
-                                // Re-get tracks
-                                targetTrack = useTimelineStore.getState().tracks.find(t => t.id === newTrackId);
+                                if (mainTrack && mainTrack.elements.length === 0) {
+                                    targetTrack = mainTrack;
+                                } else if (mainTrack && mainTrack.elements.length > 0) {
+                                    // 主轨道有内容，新建 Media Track
+                                    const newTrackId = store.addTrack("media");
+                                    targetTrack = store.tracks.find(t => t.id === newTrackId);
+                                }
+                            }
+                            // 音频没找到轨道时新建
+                            if (!targetTrack && mediaType === "audio") {
+                                const newTrackId = store.addTrack("audio");
+                                store.updateTrack(newTrackId, { name: "AI 语音轨" });
+                                targetTrack = store.tracks.find(t => t.id === newTrackId);
                             }
                         }
 
@@ -651,7 +651,23 @@ export function useAIEditSync(enabled: boolean = true) {
 
             const currentTracksSnapshot = JSON.stringify(useTimelineStore.getState().tracks);
             const newTracksSnapshot = JSON.stringify(normalizedTracks);
-            if (currentTracksSnapshot !== newTracksSnapshot) {
+            // If local changes haven't been reported yet, don't let a snapshot overwrite them.
+            // This prevents asset-only snapshot updates (e.g. upload-local during transcription)
+            // from wiping freshly-added timeline elements.
+            const localStateSummary = JSON.stringify({
+                projectId: currentProject?.id,
+                tracks: useTimelineStore.getState().tracks.map(t => ({
+                    id: t.id,
+                    elements: t.elements.map(e => ({ id: e.id, start: e.startTime, content: (e as any).content }))
+                }))
+            });
+            const hasPendingLocalChanges = localStateSummary !== lastReportedState.current;
+            const shouldSkipTrackApply =
+                hasPendingLocalChanges && currentTracksSnapshot !== newTracksSnapshot;
+
+            if (shouldSkipTrackApply) {
+                console.warn("[AI Sync] Skipping snapshot track apply due to pending local changes.");
+            } else if (currentTracksSnapshot !== newTracksSnapshot) {
                 console.log("[AI Sync] <Handle> Applying external track snapshot update...");
 
                 // CRITICAL FIX: Preserve local "loading placeholders" that might not be in the remote snapshot

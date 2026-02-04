@@ -18,6 +18,7 @@ import { EditorProvider } from "@/components/providers/editor-provider";
 import { usePlaybackControls } from "@/hooks/use-playback-controls";
 import { Onboarding } from "@/components/editor/onboarding";
 import { useAIEditSync } from "@/hooks/use-ai-edit-sync";
+import { useAutoTranscribe } from "@/hooks/use-auto-transcribe";
 
 export default function EditorClient() {
     const {
@@ -52,6 +53,9 @@ export default function EditorClient() {
 
     // Enable AI edit synchronization (polls for edits from Python/external tools)
     useAIEditSync(true);
+    
+    // Enable automatic transcription when videos are added to timeline
+    useAutoTranscribe();
 
     useEffect(() => {
         let isCancelled = false;

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import dns from "dns";
 import { 
   AGENT_BASE_PROMPT, 
   INTENT_ANALYSIS_PROMPT,
@@ -20,6 +21,9 @@ import path from "path";
 
 const WORKSPACE_ROOT = path.join(process.cwd(), "../../../");
 const SNAPSHOT_FILE = path.join(WORKSPACE_ROOT, "ai_workspace/project-snapshot.json");
+
+// Prefer IPv4 to avoid ECONNRESET on some IPv6 paths (e.g. DashScope)
+dns.setDefaultResultOrder("ipv4first");
 
 export interface AgentAction {
   action: string;
@@ -285,54 +289,15 @@ export class VideoEditorAgent {
       console.error("Failed to parse intent analysis", e);
     }
 
+    // VideoAgent 调用已禁用 - 只使用基础模式
     // 检查是否有明确指定的 VideoAgent 模式
     if (this.videoAgentMode) {
-      console.log(`[Agent] Using specified VideoAgent mode: ${this.videoAgentMode}`);
-      const modeConfig = getModeConfig(this.videoAgentMode);
-      
-      yield { 
-        type: "phase", 
-        content: `${modeConfig.icon} 使用 ${modeConfig.name}` 
-      };
-      
-      // 使用指定的模式处理
-      const videoAgentResult = yield* this.processWithVideoAgent(
-        userMessage, 
-        snapshotContext, 
-        this.videoAgentMode
-      );
-      
-      if (videoAgentResult !== null) {
-        return; // VideoAgent 成功处理
-      }
-      // 失败后继续使用基础模式
-      console.log("[Agent] VideoAgent failed, falling back to basic mode");
-    } else {
-      // 没有指定模式时，尝试自动检测
-      const detectedMode = this.autoDetectMode(userMessage);
-      
-      if (detectedMode) {
-        console.log(`[Agent] Auto-detected VideoAgent mode: ${detectedMode}`);
-        const modeConfig = getModeConfig(detectedMode);
-        
-        yield { 
-          type: "phase", 
-          content: `检测到 ${modeConfig.icon} ${modeConfig.name} 相关需求` 
-        };
-        
-        // 使用检测到的模式处理
-        const videoAgentResult = yield* this.processWithVideoAgent(
-          userMessage, 
-          snapshotContext, 
-          detectedMode
-        );
-        
-        if (videoAgentResult !== null) {
-          return;
-        }
-        console.log("[Agent] VideoAgent failed, falling back to basic mode");
-      }
+      console.log(`[Agent] VideoAgent mode specified but disabled, using basic mode instead`);
     }
+    
+    // 自动检测也已禁用
+    // const detectedMode = this.autoDetectMode(userMessage);
+    // if (detectedMode) { ... }
 
     // 如果不需要工具，直接回答
     if (!intentAnalysis.needsTools) {

@@ -10,7 +10,6 @@
   TypeIcon,
   SettingsIcon,
   MessageSquareIcon,
-  WandSparklesIcon,
 } from "lucide-react";
 import { create } from "zustand";
 
@@ -24,21 +23,20 @@ export type Tab =
   | "captions"
   | "filters"
   | "settings"
-  | "chat"
-  | "videoagent";
+  | "chat";
 
 export const tabs: { [key in Tab]: { icon: LucideIcon; label: string } } = {
   chat: {
     icon: MessageSquareIcon,
     label: "AI 助手",
   },
-  videoagent: {
-    icon: WandSparklesIcon,
-    label: "导演",
-  },
   media: {
     icon: VideoIcon,
     label: "媒体库",
+  },
+  captions: {
+    icon: CaptionsIcon,
+    label: "字幕",
   },
   sounds: {
     icon: MusicIcon,
@@ -59,10 +57,6 @@ export const tabs: { [key in Tab]: { icon: LucideIcon; label: string } } = {
   transitions: {
     icon: ArrowLeftRightIcon,
     label: "转场",
-  },
-  captions: {
-    icon: CaptionsIcon,
-    label: "字幕",
   },
   filters: {
     icon: BlendIcon,

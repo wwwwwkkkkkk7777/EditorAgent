@@ -543,9 +543,23 @@ export function Timeline() {
           if (addedItem) {
             const trackType: TrackType =
               addedItem.type === "audio" ? "audio" : "media";
-            const targetTrackId = useTimelineStore
-              .getState()
-              .insertTrackAt(trackType, 0);
+            
+            let targetTrackId: string;
+            if (trackType === "media") {
+              // 视频：只在 Main Track 为空时使用
+              const store = useTimelineStore.getState();
+              const mainTrack = store.tracks.find(t => t.isMain || t.name === "Main Track");
+              if (mainTrack && mainTrack.elements.length === 0) {
+                targetTrackId = mainTrack.id;
+              } else if (!mainTrack) {
+                targetTrackId = store.insertTrackAt(trackType, 0);
+                store.updateTrack(targetTrackId, { isMain: true, name: "Main Track" });
+              } else {
+                targetTrackId = store.insertTrackAt(trackType, 0);
+              }
+            } else {
+              targetTrackId = useTimelineStore.getState().insertTrackAt(trackType, 0);
+            }
 
             useTimelineStore.getState().addElementToTrack(targetTrackId, {
               type: "media",

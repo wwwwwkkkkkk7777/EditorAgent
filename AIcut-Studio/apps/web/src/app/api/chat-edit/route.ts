@@ -759,6 +759,7 @@ async function executeAction(actionObj: any, request: NextRequest, pendingEdits:
       addText: `已添加文本`,
       updateElement: `已调整元素`,
       removeElement: `已删除元素`,
+      splitElement: `已分割元素`,
       clearSubtitles: `已清除字幕`,
       importMedia: `已导入素材`,
       importAudio: `已导入音频`,

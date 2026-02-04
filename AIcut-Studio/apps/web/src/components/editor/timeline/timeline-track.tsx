@@ -799,11 +799,13 @@ export function TimelineTrackContent({
     // Calculate drop position relative to tracks
     const currentTrackIndex = tracks.findIndex((t) => t.id === track.id);
 
-    // Determine drop zone within the track (top 20px, middle 20px, bottom 20px)
+    // Determine drop zone within the track using track height (top/bottom 25%)
+    const trackHeight = rect.height || 1;
+    const edgeZone = trackHeight * 0.25;
     let dropPosition: "above" | "on" | "below";
-    if (mouseY < 20) {
+    if (mouseY < edgeZone) {
       dropPosition = "above";
-    } else if (mouseY > 40) {
+    } else if (mouseY > trackHeight - edgeZone) {
       dropPosition = "below";
     } else {
       dropPosition = "on";
@@ -1045,6 +1047,11 @@ export function TimelineTrackContent({
               ? canElementGoOnTrack("media", track.type)
               : false;
 
+          // If dropping onto an empty Main Track, prefer "on" regardless of edge position
+          if (isVideoOrImage && track.isMain && track.elements.length === 0) {
+            dropPosition = "on";
+          }
+
           let targetTrack = tracks.find((t) => t.id === targetTrackId);
 
           // Handle position-aware track creation for media elements
@@ -1056,6 +1063,7 @@ export function TimelineTrackContent({
               if (!mainTrack) {
                 // No main track exists, create it
                 targetTrackId = addTrack("media");
+                updateTrack(targetTrackId, { isMain: true, name: "Main Track" });
                 const updatedTracks = useTimelineStore.getState().tracks;
                 const newTargetTrack = updatedTracks.find(
                   (t) => t.id === targetTrackId
@@ -1066,7 +1074,7 @@ export function TimelineTrackContent({
                 mainTrack.elements.length === 0 &&
                 dropPosition === "on"
               ) {
-                // Main track exists and is empty, use it
+                // Main track exists and is empty, use it when dropping on it
                 targetTrackId = mainTrack.id;
                 targetTrack = mainTrack;
               } else {
@@ -1191,7 +1199,23 @@ export function TimelineTrackContent({
               if (addedItem) {
                 const trackType: TrackType =
                   addedItem.type === "audio" ? "audio" : "media";
-                const targetTrackId = insertTrackAt(trackType, 0);
+                
+                let targetTrackId: string;
+                if (trackType === "media") {
+                  // 视频：只在 Main Track 为空时使用
+                  const store = useTimelineStore.getState();
+                  const mainTrack = store.tracks.find(t => t.isMain || t.name === "Main Track");
+                  if (mainTrack && mainTrack.elements.length === 0) {
+                    targetTrackId = mainTrack.id;
+                  } else if (!mainTrack) {
+                    targetTrackId = insertTrackAt(trackType, 0);
+                    store.updateTrack(targetTrackId, { isMain: true, name: "Main Track" });
+                  } else {
+                    targetTrackId = insertTrackAt(trackType, 0);
+                  }
+                } else {
+                  targetTrackId = insertTrackAt(trackType, 0);
+                }
 
                 addElementToTrack(targetTrackId, {
                   type: "media",

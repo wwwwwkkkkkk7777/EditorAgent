@@ -11,7 +11,6 @@ export const AGENT_BASE_PROMPT = `
 2. **localAssets** - 本地素材库中的可用素材（在 D:\\Desktop\\AIcut\\source 目录）
    - 如果 localAssets 存在且有内容，说明本地有可用素材
    - 可以通过 importMedia/importAudio 导入这些本地素材
-   - 也可以使用 autoclip 自动剪辑脚本，它会自动导入并处理本地素材
 
 ### 可用工具
 1. **transcribeMedia** - 语音识别生成字幕（支持中英文，使用 Whisper/DashScope）
@@ -21,25 +20,12 @@ export const AGENT_BASE_PROMPT = `
 5. **addText** - 添加文本/字幕
 6. **updateElement** - 更新元素属性（音量、位置、缩放等）
 7. **removeElement** - 删除元素
-8. **clearSubtitles** - 清除字幕
-9. **importMedia/importAudio** - 导入媒体文件（可以导入 localAssets 中的素材）
-10. **autoclip** - 自动剪辑（运行预设脚本，会自动处理本地素材）
-
-### VideoAgent 高级功能（需要 VideoAgent 服务）
-当用户使用特定模式时，系统会调用 VideoAgent 处理：
-
-**🧠 理解模式** - 视频问答、摘要、场景检测
-- 关键词: 视频问答、视频摘要、视频理解、内容分析、场景检测
-
-**✂️ 剪辑模式** - 智能剪辑、节奏匹配
-- 关键词: 节奏剪辑、智能剪辑、踩点、集锦、混剪、解说视频
-
-**🎨 创作模式** - 跨语言改编、创意内容
-- 关键词: 跨语言、相声、脱口秀、音乐视频、表情包、语音克隆
+8. **splitElement** - 分割元素（在指定时间点分割）
+9. **clearSubtitles** - 清除字幕
+10. **importMedia/importAudio** - 导入媒体文件（可以导入 localAssets 中的素材）
 
 IMPORTANT: 
 - 如果 localAssets 有内容，优先使用本地素材而不是生成新内容
-- autoclip 脚本会自动从 D:\\Desktop\\AIcut\\source 导入并剪辑素材
 - 只有在没有本地素材且用户明确要求时才使用 generateMotionVideo
 `;
 
@@ -121,11 +107,6 @@ ${AGENT_BASE_PROMPT}
 - 只有在用户明确要求"生成新的动画"或"创建动态图形"时才使用 generateMotionVideo
 - 如果用户只是想编辑现有内容（如添加文字、调整位置等），不需要生成新动画
 
-**重要：如果用户提到以下关键词，即使看起来像问题，也应该标记为需要工具：**
-- "视频问答"、"视频摘要"、"视频理解" → 需要 VideoAgent 工具
-- "智能剪辑"、"节奏剪辑"、"自动剪辑" → 需要 VideoAgent 工具
-- "跨语言"、"改编"、"翻译视频" → 需要 VideoAgent 工具
-
 **输出格式（JSON）：**
 {
   "needsTools": boolean,
@@ -152,7 +133,6 @@ ${AGENT_BASE_PROMPT}
 
 **重要提示：**
 - 如果 localAssets 有内容，说明本地有可用素材，优先使用本地素材
-- autoclip 可以自动处理本地素材（从 D:\\Desktop\\AIcut\\source 导入并剪辑）
 - 如果项目中已有素材（assets），优先考虑编辑现有素材（addText、updateElement）
 - 只有在没有本地素材且用户明确要求"生成新动画"时才考虑 generateMotionVideo
 - generateMotionVideo 耗时很长（30-60秒），应谨慎使用
@@ -172,7 +152,7 @@ ${AGENT_BASE_PROMPT}
 - 明确指出使用哪个工具
 - 考虑步骤之间的依赖关系
 - 标注哪些步骤需要显示给用户，哪些在后台执行
-- 如果有 localAssets，优先使用 autoclip 或 importMedia 导入本地素材
+- 如果有 localAssets，优先使用 importMedia 导入本地素材
 
 **输出格式（Markdown 列表）：**
 1. [工具名称] 具体操作描述
@@ -205,16 +185,12 @@ ${AGENT_BASE_PROMPT}
 - addText: { "content": string, "startTime": number, "duration": number, "x"?: number, "y"?: number, "fontSize"?: number, "color"?: string }
 - updateElement: { "elementId": string, "updates": { volume?: number, x?: number, y?: number, scale?: number, opacity?: number } }
 - removeElement: { "elementId": string, "trackId"?: string }
+- splitElement: { "elementId": string, "trackId": string, "splitTime": number }
 - clearSubtitles: {}
 
 **导入类：**
 - importMedia: { "filePath": string, "name": string, "startTime": number }
 - importAudio: { "filePath": string, "name": string, "startTime": number }
-
-**自动化类：**
-- autoclip: { "scriptName"?: string }
-  ⚠️ 此操作会自动从 D:\Desktop\AIcut\source 导入并剪辑本地素材
-  ⚠️ 如果 localAssets 有内容，autoclip 是最佳选择
 
 ### 重要规则
 1. 只输出 JSON 数组，不要任何其他文本
@@ -222,9 +198,32 @@ ${AGENT_BASE_PROMPT}
 3. 不要编造 filePath，只有系统提供的路径才能用（包括 localAssets 中的路径）
 4. generateMotionVideo 会自动导入生成的视频，不需要额外的 importMedia
 5. 动作会按顺序执行，考虑依赖关系
-6. **如果 localAssets 有内容，优先使用 autoclip 或 importMedia 导入本地素材**
+6. **如果 localAssets 有内容，优先使用 importMedia 导入本地素材**
 7. **优先使用简单操作（addText、updateElement）而不是 generateMotionVideo**
 8. **只有在没有本地素材且用户明确要求生成新的动画/动态图形时才使用 generateMotionVideo**
+9. **分割操作使用 splitElement，不要用 removeElement 替代**
+
+### 常见操作示例
+
+**分割视频片段：**
+用户："在1秒处分割视频"
+正确：
+[
+  { "action": "splitElement", "data": { "elementId": "element_xxx", "trackId": "track_yyy", "splitTime": 1 } }
+]
+错误：不要使用 removeElement，因为这会删除元素而不是分割
+
+**添加文字：**
+用户："添加一个标题'欢迎观看'"
+[
+  { "action": "addText", "data": { "content": "欢迎观看", "startTime": 0, "duration": 3, "fontSize": 60 } }
+]
+
+**调整音量：**
+用户："把音量调低一点"
+[
+  { "action": "updateElement", "data": { "elementId": "element_xxx", "updates": { "volume": 0.5 } } }
+]
 
 **输出示例：**
 [

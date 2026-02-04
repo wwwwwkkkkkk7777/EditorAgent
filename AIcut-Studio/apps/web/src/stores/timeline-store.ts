@@ -1711,6 +1711,8 @@ export const useTimelineStore = create<TimelineStore>((set, get) => {
     },
 
     addElementToNewTrack: (item) => {
+      console.log("[addElementToNewTrack] Called with item:", item.type, item.name);
+      
       if (item.type === "text") {
         const targetTrackId = get().insertTrackAt("text", 0);
         get().addElementToTrack(
@@ -1722,7 +1724,36 @@ export const useTimelineStore = create<TimelineStore>((set, get) => {
 
       const media = item as MediaFile;
       const trackType = media.type === "audio" ? "audio" : "media";
-      const targetTrackId = get().insertTrackAt(trackType, 0);
+      
+      console.log("[addElementToNewTrack] trackType:", trackType);
+      
+      // 对于视频和图片，只有当 Main Track 为空时才使用它
+      let targetTrackId: string;
+      if (trackType === "media") {
+        // 查找主轨道
+        const mainTrack = get()._tracks.find(t => t.isMain || t.name === "Main Track");
+        console.log("[addElementToNewTrack] mainTrack found:", mainTrack?.name, "elements:", mainTrack?.elements.length);
+        
+        if (mainTrack && mainTrack.elements.length === 0) {
+          // Main Track 存在且为空，使用它
+          targetTrackId = mainTrack.id;
+          console.log("[addElementToNewTrack] Using existing empty Main Track:", targetTrackId);
+        } else if (!mainTrack) {
+          // Main Track 不存在，创建它
+          targetTrackId = get().insertTrackAt(trackType, 0);
+          get().updateTrack(targetTrackId, { isMain: true, name: "Main Track" });
+          console.log("[addElementToNewTrack] Created new Main Track:", targetTrackId);
+        } else {
+          // Main Track 已有内容，创建新的 Media Track
+          targetTrackId = get().insertTrackAt(trackType, 0);
+          console.log("[addElementToNewTrack] Main Track has content, created new Media Track:", targetTrackId);
+        }
+      } else {
+        // 音频轨道正常创建
+        targetTrackId = get().insertTrackAt(trackType, 0);
+        console.log("[addElementToNewTrack] Created audio track:", targetTrackId);
+      }
+      
       get().addElementToTrack(targetTrackId, {
         type: "media",
         mediaId: media.id,

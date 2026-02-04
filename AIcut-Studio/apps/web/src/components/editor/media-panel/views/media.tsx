@@ -276,7 +276,7 @@ export function MediaView() {
 
         // 异步触发视频摘要生成（不阻塞上传流程）
         if (file.type.startsWith("video/")) {
-          const videoPath = uploadResult.url || filePath || file.name;
+          const videoPath = filePath || uploadResult.url || file.name;
           console.log(`[Media Import] Triggering async summary generation for: ${videoPath}`);
           generateVideoSummary(videoPath, activeProject.id)
             .then((result) => {

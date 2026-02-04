@@ -36,6 +36,44 @@ function generateVideoId(videoPath: string): string {
   return crypto.createHash("md5").update(videoPath).digest("hex").substring(0, 12);
 }
 
+// Resolve input videoPath to a local filesystem path when possible
+function resolveVideoFilePath(inputPath: string): string | null {
+  if (!inputPath) return null;
+
+  // Query param path=...
+  const queryMatch = inputPath.match(/[?&]path=([^&]+)/);
+  if (queryMatch?.[1]) {
+    try {
+      return decodeURIComponent(queryMatch[1]);
+    } catch {
+      // fall through
+    }
+  }
+
+  // URL with query param
+  try {
+    const url = inputPath.startsWith("http")
+      ? new URL(inputPath)
+      : new URL(inputPath, "http://localhost");
+    const pathParam = url.searchParams.get("path");
+    if (pathParam) {
+      try {
+        return decodeURIComponent(pathParam);
+      } catch {
+        return pathParam;
+      }
+    }
+
+    if (inputPath.startsWith("file://")) {
+      return decodeURIComponent(url.pathname).replace(/^\/([A-Za-z]:)/, "$1");
+    }
+  } catch {
+    // ignore
+  }
+
+  return inputPath;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { action, data } = await request.json();
@@ -49,7 +87,8 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ success: false, error: "Missing videoPath" }, { status: 400 });
         }
 
-        const videoId = generateVideoId(videoPath);
+        const resolvedVideoPath = resolveVideoFilePath(videoPath);
+        const videoId = generateVideoId(resolvedVideoPath || videoPath);
         const summaryPath = getSummaryFilePath(videoId);
 
         // 检查是否已有缓存的摘要
@@ -63,11 +102,17 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        console.log(`[Video Summary] Generating summary for ${videoPath}`);
+        console.log(`[Video Summary] Generating summary for ${resolvedVideoPath || videoPath}`);
 
         // 调用 VideoAgent 的 VideoSummarizationGenerator
         try {
-          const videoDir = path.dirname(videoPath);
+          const targetPath = resolvedVideoPath || videoPath;
+          if (!targetPath || !fs.existsSync(targetPath)) {
+            throw new Error(`Video path not found on disk: ${targetPath}`);
+          }
+
+          const stat = fs.statSync(targetPath);
+          const videoDir = stat.isDirectory() ? targetPath : path.dirname(targetPath);
           const response = await fetch(`${VIDEOAGENT_API_URL}/api/videoagent/execute-tool`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -95,7 +140,7 @@ export async function POST(request: NextRequest) {
           // 保存摘要结果
           const summaryData = {
             videoId,
-            videoPath,
+            videoPath: resolvedVideoPath || videoPath,
             projectId,
             generatedAt: Date.now(),
             summary: result.result?.content_output?.content_created || "",
